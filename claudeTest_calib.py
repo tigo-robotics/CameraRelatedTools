@@ -12,8 +12,9 @@ criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 objp = np.zeros((CHESSBOARD_SIZE[0] * CHESSBOARD_SIZE[1], 3), np.float32)
 objp[:, :2] = np.mgrid[0:CHESSBOARD_SIZE[0], 0:CHESSBOARD_SIZE[1]].T.reshape(-1, 2)
 objp *= SQUARE_SIZE
-
+msg = ''
 def calibrate_camera(frame, objpoints, imgpoints):
+    global msg
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     ret, corners = cv2.findChessboardCorners(gray, CHESSBOARD_SIZE, None)
     
@@ -22,8 +23,9 @@ def calibrate_camera(frame, objpoints, imgpoints):
         objpoints.append(objp)
         imgpoints.append(corners2)
         cv2.drawChessboardCorners(frame, CHESSBOARD_SIZE, corners2, ret)
+        msg=''
     else:
-        print('Cannot find corners of chessboard pattern.')
+        msg='ChessNF'
     return frame, ret, objpoints, imgpoints
 
 def main():
@@ -73,7 +75,7 @@ def main():
         # Combine frames side by side
         combined_frame = np.hstack((left_frame, right_frame))
         cv2.imshow('Dual Camera Calibration', combined_frame)
-
+        print(msg)
         key = cv2.waitKey(1)
         if key == 27:  # ESC key
             break
