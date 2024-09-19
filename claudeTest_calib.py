@@ -29,7 +29,7 @@ def calibrate_camera(frame, objpoints, imgpoints):
     return frame, ret, objpoints, imgpoints
 
 def main():
-    cap = cv2.VideoCapture(1)  # Adjust this if necessary for your dual camera setup
+    cap = cv2.VideoCapture(0)  # Adjust this if necessary for your dual camera setup
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
@@ -75,7 +75,7 @@ def main():
         # Combine frames side by side
         combined_frame = np.hstack((left_frame, right_frame))
         cv2.imshow('Dual Camera Calibration', combined_frame)
-        print(msg)
+        if msg!='': print(msg)
         key = cv2.waitKey(1)
         if key == 27:  # ESC key
             break
