@@ -119,6 +119,27 @@ def project_3d_to_2d(point, focal_length=500, center_x=320, center_y=240):
 def is_valid_point(x, y):
     return not (math.isnan(x) or math.isnan(y))
 
+def save_point_cloud_to_ply(points, colors, file_path='point_cloud.ply'):
+    """
+    Save a point cloud to a PLY file.
+
+    Args:
+        points (list of lists): 3D points.
+        colors (list of lists): Corresponding RGB colors.
+        file_path (str): Path to the file where the point cloud will be saved.
+    """
+    # Create an Open3D point cloud object
+    point_cloud = o3d.geometry.PointCloud()
+    
+    # Set the points and colors
+    point_cloud.points = o3d.utility.Vector3dVector(points)
+    point_cloud.colors = o3d.utility.Vector3dVector(colors)
+    
+    # Save to PLY file
+    o3d.io.write_point_cloud(file_path, point_cloud)
+    print(f"Point cloud saved to {file_path}")
+
+
 @app.route('/get_point_cloud')
 def get_point_cloud():
     global cap, calib_data
@@ -156,9 +177,11 @@ def get_point_cloud():
                     "b": int(color[2])
                 })
         
+        # Save the point cloud as a PLY file from the first frame
+        save_point_cloud_to_ply(points, colors, file_path='point_cloud_first_frame.ply')
+        
         try:
             json_data = json.dumps({"points": compact_data}, ensure_ascii=False)
-            #print(json_data)  # Debugging: print JSON to console
             return Response(json_data, mimetype='application/json')
         except Exception as e:
             print(f"Error serializing data: {str(e)}")
@@ -166,6 +189,7 @@ def get_point_cloud():
     else:
         return jsonify({"error": "Failed to create point cloud"})
     
+
 @app.route('/')
 def index():
     html_content = """
@@ -215,7 +239,7 @@ def index():
                         debugInfo.innerText = `Fetch Error: ${error}`;
                     });
 
-                setTimeout(updatePointCloud, 300); // Update every 1 second
+                setTimeout(updatePointCloud, 100); // Update every 1 second
             }
 
             updatePointCloud();
